@@ -34,14 +34,14 @@ qué riesgo supone y qué tiene que hacer el cliente.*
 
 | Campo | Valor |
 |---|---|
-| Equipo | [ ] |
-| Operador / Investigador / Documentalista | [ ] / [ ] / [ ] |
-| Fecha | [ ] |
-| IP de Kali | [10.0.1.__] |
-| IP de DC-1 (objetivo) | [10.0.1.__] |
+| Equipo | [ 3 ] |
+| Operador / Investigador / Documentalista/ Revisor | [ ] / [ ] / [ ] / [ ] |
+| Fecha | [ 19-11-2026 ] |
+| IP de Kali | [10.0.1.10__] |
+| IP de DC-1 (objetivo) | [10.0.1.12__] |
 | Permitido | Solo la IP de DC-1: escaneo, análisis web, explotación y escalada |
 | Prohibido | Cualquier otra IP, la red del centro, la denegación de servicio |
-| ¿La IP de DC-1 está en `10.0.1.0/24`? | [Sí / No] |
+| ¿La IP de DC-1 está en `10.0.1.0/24`? | [**Sí** / No] |
 
 ---
 
@@ -57,18 +57,12 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 
 | Comando | Qué esperamos | Qué ha salido (lo importante) | Captura |
 |---|---|---|---|
-| [ ] | [ ] | [ ] | [n.º] |
-| [ ] | [ ] | [ ] | [n.º] |
+| [ `nmap -sn 10.0.1.0/24` ] | [ Esperemos que escanee la red 10.0.1.0/24 y nos diga todas las IPs conectadas ] | [ Sale la IP de la maquina vulnerable 10.0.1.12 ] | [n.º1] |
+| [ `nmap -sV -sC 10.0.1.12` ] | [ Esperamos que nos escanee los puertos abiertos, los servicios y las versiones de la IP ademas de las cabeceras ] | [ El puerto 22 ssh, el 80 con http con cabecera drupal7 y 111 con RCPbind ] | [n.º2] |
 
-**Servicios encontrados:** [puerto · servicio · versión]
+**Servicios encontrados:** [22 · ssh · Openssh 6.0p1 Debian 4+DEB7u7] [80 · shttp · Apachehttpd 2.2.22 (Debian)] [111 · RCPbind · 2-4]
 
-**¿Qué servicio parece más interesante y por qué?** [ ]
-
-> **Ejemplo de fila bien rellenada:**
->
-> | Comando | Qué esperamos | Qué ha salido | Captura |
-> |---|---|---|---|
-> | `nmap -sV 10.0.1.5` | Ver los puertos abiertos y la versión de cada servicio | 22 SSH, 80 HTTP (Apache con Drupal 7), 111 rpcbind | 2 |
+**¿Qué servicio parece más interesante y por qué?** [ El servicio http es el mas importante debido a que esta abierto a internet y en un principio no tiene clave ]
 
 ### Fase 2 · Vulnerabilidades: ¿qué tiene un fallo conocido?
 
@@ -77,9 +71,9 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 
 | Comando o fuente consultada | Qué esperamos | Qué ha salido | Captura |
 |---|---|---|---|
-| [ ] | [ ] | [ ] | [n.º] |
+| [ msfconsole && search drupal7 ] | [ Esperamos obtener una vulnerabilidad de la cabecera drupal7 ] | [ Ha salido una vulnerabilidad conocida como drupalggedon una vulnerabilidad critica que permite la ejecución remota de código] | [n.º3] |
 
-**Vulnerabilidad elegida (CVE) y qué permite hacer:** [ ]
+**Vulnerabilidad elegida (CVE) y qué permite hacer:** [ CVE-2014-3704 permite la ejecución remota de código ]
 
 ### Fase 3 · Explotación: ¿cómo conseguimos entrar?
 
@@ -88,10 +82,10 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 
 | Comando | Qué esperamos | Qué ha salido | Captura |
 |---|---|---|---|
-| [ ] | [ ] | [ ] | [n.º] |
+| [  ] | [  ] | [  ] | [n.º4] |
 
-**¿Con qué usuario hemos entrado?** [ ]
-**¿Por qué no somos administradores todavía?** [ ]
+**¿Con qué usuario hemos entrado?** [ www-data ]
+**¿Por qué no somos administradores todavía?** [ Por que deberemos de escalar de privilegios a traves de los comando que diremos en Posexplotación. ]
 
 ### Fase 4 · Posexplotación: ¿cómo llegamos a administrador?
 
@@ -100,7 +94,7 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 
 | Comando | Qué esperamos | Qué ha salido | Captura |
 |---|---|---|---|
-| [ ] | [ ] | [ ] | [n.º] |
+| [  ] | [  ] | [  ] | [n.º5] |
 
 **¿Qué fallo de configuración nos ha permitido escalar?** [ ]
 **Usuario final:** [ ]
@@ -116,16 +110,8 @@ Un hallazgo es **un fallo del servidor**, no lo que habéis hecho vosotros. Una 
 
 | Fallo encontrado | Por qué existe (causa) | Gravedad | Cómo corregirlo | Cómo detectar el ataque |
 |---|---|---|---|---|
-| [ ] | [ ] | [Crítica / Alta / Media / Baja] | [ ] | [ ] |
+| [ drupal7 ] | [ El sitio utiliza una versión desactualizada de Drupal 7 que no valida ni sanea correctamente las claves de los arrays en las consultas SQL, permitiendo inyección SQL y ejecución remota de código.] | [**Crítica **_/ Alta / Media / Baja] | [ Actualizar el núcleo de Drupal a una versión segura/soportada y revisar que no existan usuarios o archivos maliciosos creados tras el compromiso. ] | [ Revisar los registros de acceso del servidor web (/var/log/apache2/access.log) en busca de peticiones POST sospechosas o payloads SQL inusuales, y monitorizar procesos hijos anómalos lanzados por el usuario ] |
 | [ ] | [ ] | [ ] | [ ] | [ ] |
-
-> **Ejemplo:**
->
-> | Fallo | Causa | Gravedad | Cómo corregirlo | Cómo detectar el ataque |
-> |---|---|---|---|---|
-> | Drupal 7 vulnerable a *Drupalgeddon2* (CVE-2018-7600): permite ejecutar código sin contraseña | No se ha actualizado desde 2018 | Crítica | Actualizar Drupal a una versión corregida | Revisar los registros del servidor web en busca de peticiones anómalas a `/user/register` |
->
-> ❌ Evitad respuestas como «Hemos entrado con Metasploit» o «Mejorar la seguridad».
 
 ---
 
@@ -139,13 +125,3 @@ Cada integrante añade al menos una fila con su bitácora.
 | [ ] | [ ] | [ ] | [ ] |
 | [ ] | [ ] | [ ] | [ ] |
 
----
-
-## Antes de entregar
-
-- [ ] Las cuatro fases tienen al menos un comando con lo que esperábamos, lo que salió y una captura.
-- [ ] Cada fallo tiene causa, gravedad, corrección y detección.
-- [ ] Está escrito el resumen del apartado 1.
-- [ ] Cada integrante ha rellenado su fila de IA.
-- [ ] Los tres sabemos explicar por qué hicimos cada paso (la defensa se sortea).
-- [ ] Las capturas van adjuntas y numeradas.
