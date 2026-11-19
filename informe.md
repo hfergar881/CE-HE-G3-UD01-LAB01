@@ -35,7 +35,7 @@ qué riesgo supone y qué tiene que hacer el cliente.*
 | Campo | Valor |
 |---|---|
 | Equipo | [ 3 ] |
-| Operador / Investigador / Documentalista/ Revisor | [ ] / [ ] / [ ] / [ ] |
+| Operador / Investigador / Documentalista/ Revisor | [ Alejandro ] / [ Angela ] / [ Rubén ] / [ Hugo ] |
 | Fecha | [ 19-11-2026 ] |
 | IP de Kali | [10.0.1.10__] |
 | IP de DC-1 (objetivo) | [10.0.1.12__] |
