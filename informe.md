@@ -126,7 +126,7 @@ Un hallazgo es **un fallo del servidor**, no lo que habéis hecho vosotros. Una 
 
 | Fallo encontrado | Por qué existe (causa) | Gravedad | Cómo corregirlo | Cómo detectar el ataque |
 |---|---|---|---|---|
-| [ drupal7 ] | [ El sitio utiliza una versión desactualizada de Drupal 7 que no valida ni sanea correctamente las claves de los arrays en las consultas SQL, permitiendo inyección SQL y ejecución remota de código.] | [**Crítica **_/ Alta / Media / Baja] | [ Actualizar el núcleo de Drupal a una versión segura/soportada y revisar que no existan usuarios o archivos maliciosos creados tras el compromiso. ] | [ Revisar los registros de acceso del servidor web (/var/log/apache2/access.log) en busca de peticiones POST sospechosas o payloads SQL inusuales, y monitorizar procesos hijos anómalos lanzados por el usuario ] |
+| Uso de drupal7 | El sitio utiliza una versión desactualizada de Drupal7 que no valida ni sanea correctamente las claves de los arrays en las consultas SQL, permitiendo inyección SQL y ejecución remota de código. | **Crítica** | Actualizar el núcleo de Drupal a una versión segura/soportada y revisar que no existan usuarios o archivos maliciosos creados tras el compromiso. | Revisar los registros de acceso del servidor web (/var/log/apache2/access.log) en busca de peticiones POST sospechosas o payloads SQL inusuales, y monitorizar procesos hijos anómalos lanzados por el usuario |
 | [ ] | [ ] | [ ] | [ ] | [ ] |
 
 ---
