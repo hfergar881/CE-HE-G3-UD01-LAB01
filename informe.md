@@ -71,10 +71,8 @@ que va a pasar. Si no sabéis escribirlo, preguntad a la IA qué hace el comando
 **¿Qué servicio parece más interesante y por qué?**  
 El servicio http es el más importante debido a que está abierto a internet y en un principio no tiene clave de acceso.
 
-### Fase 2 · Vulnerabilidades: ¿qué tiene un fallo conocido?
-
-> **Pregunta de ayuda para la IA:** «He encontrado este servicio y esta versión: […]. ¿Cómo busco
-> si tiene vulnerabilidades conocidas? ¿Qué es un CVE?»
+### Fase 2 · Vulnerabilidades: ¿qué tiene un fallo conocido?  
+Ya sabiamos anteriormente que drupal7 era una versión vulnerable por eso buscamos directamente los exploits.
 
 | Comando o fuente consultada | Qué esperamos | Qué ha salido | Captura |
 |---|---|---|---|
@@ -103,14 +101,12 @@ www-data
 **¿Por qué no somos administradores todavía?**  
 Porque entramos con un usuario web normal sin permisos; deberemos escalar privilegios.
 
-### Fase 4 · Posexplotación: ¿cómo llegamos a administrador?
-
-> **Pregunta de ayuda para la IA:** «Tengo acceso como un usuario limitado en Linux. ¿Qué es
-> escalar privilegios y qué debería revisar en el sistema?»
+### Fase 4 · Posexplotación: ¿cómo llegamos a administrador?  
 
 | Comando | Qué esperamos | Qué ha salido | Captura |
 |---|---|---|---|
-| [  ] | [  ] | [  ] | [n.º5] |
+| [ find / -perm -4000 2>/dev/null ] | [ Esperamos encontrar binarios con permisos SUID ] | [ Ha salido un listado de binarios, destacamos el propio find que es el que usaremos para una reverse shell ] | [n.º5] |
+| [ find . -exec /bin/sh \; -quit] | [ esperamos escalar privilegios hasta root ] | [ hemos conseguido escalar privilegios, al hacer whoami ha salido que somos usuario root  ] | [n.º6] |
 
 **¿Qué fallo de configuración nos ha permitido escalar?** [ ]
 **Usuario final:** [ ]
